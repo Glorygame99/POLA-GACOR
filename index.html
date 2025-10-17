@@ -1,467 +1,227 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pengacak Card Game & Pola Otomatis</title>
+  <meta charset="UTF-8">
+  <title>SUPERFUN99 - Pola Gacor Hari Ini</title>
   <style>
-    :root{
-      --bg:#111;
-      --card-bg:#fff;
-      --accent:#ffcc00;
-      --muted:#aaa;
-      --panel:#1a1a1a;
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: #000;
+      color: #fff;
     }
-    body{
-      margin:0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: radial-gradient(circle at 10% 10%, #141414 0%, #0b0b0b 60%);
-      color:#eee;
-      min-height:100vh;
-      padding:20px;
-      box-sizing:border-box;
+
+    .banner {
+      text-align: center;
+      background: linear-gradient(90deg, #ffcc00, #ff6600);
+      padding: 20px 10px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #000;
+      text-shadow: 1px 1px #fff;
     }
-    header{display:flex;gap:16px;align-items:center;margin-bottom:14px;}
-    h1{font-size:20px;margin:0;color:var(--accent)}
-    .container{display:grid;grid-template-columns:360px 1fr;gap:16px;}
-    .panel{
-      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-      border-radius:10px;
-      padding:14px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+
+    .search-bar {
+      background: #fff;
+      color: #000;
+      font-weight: bold;
+      padding: 10px 20px;
+      text-align: center;
+      margin: 10px auto;
+      width: fit-content;
+      border-radius: 10px;
+      font-size: 20px;
     }
-    label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
-    select,input[type="number"],input[type="text"]{
-      width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);
-      background:#0f0f0f;color:#fff;margin-top:6px;box-sizing:border-box;
+
+    .game-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
     }
-    .btn{
-      display:inline-block;padding:10px 12px;border-radius:8px;background:var(--accent);color:#111;font-weight:700;border:none;cursor:pointer;margin-top:10px;
+
+    .game-card {
+      border: 2px solid #ff0000;
+      border-radius: 12px;
+      background: #1c1c1c;
+      padding: 15px;
+      position: relative;
     }
-    .btn.secondary{background:#333;color:#fff;border:1px solid rgba(255,255,255,0.04)}
-    .row{display:flex;gap:8px;align-items:center}
-    .small{font-size:13px;color:var(--muted)}
-    .deck{display:flex;flex-wrap:wrap;gap:6px;padding-top:10px}
-    .card{
-      width:48px;height:70px;border-radius:6px;display:flex;align-items:center;justify-content:center;
-      background:var(--card-bg);color:#111;font-weight:700;box-shadow:0 4px 8px rgba(0,0,0,0.5);
-      user-select:none;font-size:14px;
+
+    .game-card h3 {
+      margin: 0 0 10px 0;
+      font-size: 20px;
+      color: #ffcc00;
     }
-    .log{height:220px;overflow:auto;background:#050505;border-radius:8px;padding:10px;margin-top:10px;font-family:monospace;font-size:13px;color:#bfbfbf}
-    .preset{display:flex;gap:8px;flex-direction:column;margin-top:6px}
-    .preset button{background:#222;color:#fff;border-radius:6px;padding:8px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;text-align:left}
-    .status{margin-top:10px;padding:8px;border-radius:6px;background:#0b0b0b;color:#9f9f9f}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .pattern-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-    footer{margin-top:12px;color:var(--muted);font-size:13px}
+
+    .game-card .badge {
+      background: red;
+      color: white;
+      font-weight: bold;
+      padding: 6px 12px;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      transform: rotate(-10deg);
+    }
+
+    .settings {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .setting-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px dashed #555;
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .icon-check {
+      background: limegreen;
+      color: #000;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .icon-cross {
+      background: crimson;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Pengacak Card Game & Pola Otomatis</h1>
-    <div class="small">Versi demo — ubah pola, acak, dan jalankan mode otomatis</div>
-  </header>
 
-  <div class="container">
-    <div class="panel">
-      <label>Pilih Preset Game</label>
-      <div class="preset">
-        <button data-preset="mahjong">Mahjong Wins</button>
-        <button data-preset="starlight">Starlight Princess</button>
-        <button data-preset="showdown">Wild West Showdown</button>
-        <button data-preset="mahjongways">Mahjong Ways</button>
-      </div>
-
-      <label>Nama Konfigurasi</label>
-      <input id="configName" type="text" value="Konfigurasi 1">
-
-      <div class="pattern-grid">
-        <div>
-          <label>Rentang Bet (min - max)</label>
-          <div style="display:flex;gap:6px">
-            <input id="betMin" type="number" value="400" min="1">
-            <input id="betMax" type="number" value="10000" min="1">
-          </div>
-        </div>
-        <div>
-          <label>Interval Auto (detik)</label>
-          <input id="autoInterval" type="number" value="5" min="1">
-        </div>
-      </div>
-
-      <label>Opsi Pola (Manual / Otomatis) & Turbo</label>
-      <div class="pattern-grid">
-        <div>
-          <label>Manual Multiplier (contoh 9x, 16x)</label>
-          <input id="manualMulti" type="text" value="9x,9x">
-        </div>
-        <div>
-          <label>Otomatis Multiplier (contoh 10x,30x)</label>
-          <input id="autoMulti" type="text" value="10x,30x">
-        </div>
-      </div>
-
-      <label>Turbo Mode</label>
-      <div class="row">
-        <select id="turboMode">
-          <option value="off">OFF</option>
-          <option value="on">ON</option>
-        </select>
-      </div>
-
-      <div class="controls">
-        <button id="acakPola" class="btn">Acak Pola</button>
-        <button id="acakDeck" class="btn secondary">Acak Deck</button>
-        <button id="startAuto" class="btn">Mulai Mode Otomatis</button>
-        <button id="stopAuto" class="btn secondary">Berhenti Otomatis</button>
-        <button id="exportConfig" class="btn secondary">Export JSON</button>
-      </div>
-
-      <div class="status" id="statusBox">
-        Status: Siap
-      </div>
-
-      <label>Log Hasil / Aktivitas</label>
-      <div id="log" class="log"></div>
-    </div>
-
-    <div class="panel">
-      <label>Deck (klik "Acak Deck" untuk mengacak)</label>
-      <div id="deck" class="deck"></div>
-
-      <label style="margin-top:12px">Pola Saat Ini</label>
-      <div id="currentPattern" style="padding:10px;background:#080808;border-radius:8px;margin-top:6px">
-        <pre id="patternText" style="white-space:pre-wrap;color:#cfcfcf;margin:0">Tidak ada pola.</pre>
-      </div>
-
-      <label style="margin-top:10px">Hasil Draw Terakhir</label>
-      <div id="lastDraw" style="padding:10px;background:#080808;border-radius:8px;margin-top:6px;color:#d1ffd6">Belum ada</div>
-
-      <footer>
-        Tips: Tekan "Acak Pola" untuk membuat konfigurasi acak. Mode otomatis akan berganti pola setiap interval. Nilai dapat diketik langsung untuk kontrol lanjutan.
-      </footer>
-    </div>
+  <div class="banner">
+    SPESIAL HARI INI<br>
+    PERKALIAN TERTINGGI, KESEMPATAN JP TERBANYAK!
   </div>
 
-<script>
-/*
-  Script: Pengacak Card Game & Pola Otomatis
-  Penjelasan singkat fungsi:
-  - Preset men-set pola awal
-  - "Acak Pola" bikin konfigurasi multipliers dan bet acak (berdasarkan preset)
-  - "Acak Deck" akan mengacak deck 52 kartu (atau bisa disesuaikan)
-  - Mode Auto: setiap interval akan mengacak pola + draw kartu
-*/
+  <div class="search-bar">SUPERFUN99</div>
 
-(function(){
-  // Util helpers
-  function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
-  function shuffle(array){
-    // Fisher-Yates
-    for(let i = array.length - 1; i > 0; i--){
-      const j = Math.floor(Math.random() * (i+1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
+  <div class="game-list">
 
-  // Deck generator (standard 52)
-  const suits = ['♠','♥','♦','♣'];
-  const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-  function createDeck(){
-    const d=[];
-    for(const s of suits){
-      for(const r of ranks) d.push({code: r + s, suit:s, rank:r});
-    }
-    return d;
-  }
+    <!-- Game 1 -->
+    <div class="game-card">
+      <h3>🔥 Mahjong Wins (Black Scatter)</h3>
+      <div class="badge">GACOR</div>
 
-  // DOM
-  const deckEl = document.getElementById('deck');
-  const logEl = document.getElementById('log');
-  const patternText = document.getElementById('patternText');
-  const statusBox = document.getElementById('statusBox');
-  const lastDraw = document.getElementById('lastDraw');
+      <div class="settings">
+        <div class="setting-line">
+          <span>(BET 400 - 10.000)</span>
+        </div>
+        <div class="setting-line">
+          <span>MANUAL 9x ON DC</span>
+          <div class="status-icons">
+            <span class="icon-cross">✖</span>
+            <span class="icon-check">✔</span>
+          </div>
+        </div>
+        <div class="setting-line">
+          <span>OTOMATIS 10x ON DC</span>
+          <div class="status-icons">
+            <span class="icon-cross">✖</span>
+            <span class="icon-check">✔</span>
+          </div>
+        </div>
+        <div class="setting-line">
+          <span>MANUAL 9x ON DC</span>
+          <div class="status-icons">
+            <span class="icon-cross">✖</span>
+            <span class="icon-check">✔</span>
+          </div>
+        </div>
+        <div class="setting-line">
+          <span>OTOMATIS 30x OFF DC</span>
+          <div class="status-icons">
+            <span class="icon-check">✔</span>
+            <span class="icon-cross">✖</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  // Controls
-  const presetBtns = document.querySelectorAll('[data-preset]');
-  const acakPolaBtn = document.getElementById('acakPola');
-  const acakDeckBtn = document.getElementById('acakDeck');
-  const startAutoBtn = document.getElementById('startAuto');
-  const stopAutoBtn = document.getElementById('stopAuto');
-  const exportBtn = document.getElementById('exportConfig');
+    <!-- Game 2 -->
+    <div class="game-card">
+      <h3>✨ Starlight Princess</h3>
+      <div class="badge">GACOR</div>
 
-  // Inputs
-  const configNameInp = document.getElementById('configName');
-  const betMinInp = document.getElementById('betMin');
-  const betMaxInp = document.getElementById('betMax');
-  const manualMultiInp = document.getElementById('manualMulti');
-  const autoMultiInp = document.getElementById('autoMulti');
-  const turboModeSel = document.getElementById('turboMode');
-  const autoIntervalInp = document.getElementById('autoInterval');
+      <div class="settings">
+        <div class="setting-line">
+          <span>(BET 400 - 10.000)</span>
+        </div>
+        <div class="setting-line">
+          <span>MANUAL 16x ON DC</span>
+          <div class="status-icons">
+            <span class="icon-check">✔</span>
+            <span class="icon-check">✔</span>
+          </div>
+        </div>
+        <div class="setting-line">
+          <span>OTOMATIS 30x ON DC</span>
+          <div class="status-icons">
+            <span class="icon-check">✔</span>
+            <span class="icon-check">✔</span>
+          </div>
+        </div>
+        <div class="setting-line">
+          <span>MANUAL 7x ON DC</span>
+          <div class="status-icons">
+            <span class="icon-check">✔</span>
+            <span class="icon-check">✔</span>
+          </div>
+        </div>
+        <div class="setting-line">
+          <span>OTOMATIS 10x OFF DC</span>
+          <div class="status-icons">
+            <span class="icon-check">✔</span>
+            <span class="icon-check">✔</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  // State
-  let currentDeck = createDeck();
-  let pattern = {};
-  let autoTimer = null;
+    <!-- Game 3 -->
+    <div class="game-card">
+      <h3>🤠 Wild West Showdown</h3>
 
-  // Presets
-  const presets = {
-    mahjong: {
-      name:'Mahjong Wins',
-      manual:'9x,9x',
-      auto:'10x,30x',
-      betMin:400, betMax:10000, turbo:'off'
-    },
-    starlight: {
-      name:'Starlight Princess',
-      manual:'16x,7x',
-      auto:'30x,10x',
-      betMin:400, betMax:10000, turbo:'off'
-    },
-    showdown: {
-      name:'Wild West Showdown',
-      manual:'17x,13x',
-      auto:'10x,10x',
-      betMin:400, betMax:10000, turbo:'off'
-    },
-    mahjongways: {
-      name:'Mahjong Ways',
-      manual:'9x,13x',
-      auto:'10x,30x',
-      betMin:400, betMax:10000, turbo:'on'
-    }
-  };
+      <div class="settings">
+        <div class="setting-line">
+          <span>(BET 400 - 10.000)</span>
+        </div>
+        <div class="setting-line">
+          <span>MANUAL 17x (TURBO OFF)</span>
+        </div>
+        <div class="setting-line">
+          <span>OTOMATIS 10x (TURBO ON)</span>
+        </div>
+        <div class="setting-line">
+          <span>OTOMATIS 10x (TURBO OFF)</span>
+        </div>
+        <div class="setting-line">
+          <span>MANUAL 13x (TURBO ON)</span>
+        </div>
+      </div>
+    </div>
 
-  // Render deck
-  function renderDeck(){
-    deckEl.innerHTML = '';
-    for(const c of currentDeck.slice(0,52)){
-      const el = document.createElement('div');
-      el.className = 'card';
-      el.textContent = c.code;
-      // color hearts/diamonds red
-      if(c.suit === '♥' || c.suit === '♦') el.style.color = '#b33';
-      deckEl.appendChild(el);
-    }
-  }
-
-  // Log helper
-  function addLog(txt){
-    const time = new Date().toLocaleTimeString();
-    logEl.innerText = `[${time}] ${txt}\n` + logEl.innerText;
-  }
-
-  // Generate random pattern based on current preset-ish inputs
-  function generatePatternRandomly(biasPreset=null){
-    // read base values
-    const betMin = parseInt(betMinInp.value) || 1;
-    const betMax = parseInt(betMaxInp.value) || 1000;
-    const turbo = turboModeSel.value;
-    const manualStr = manualMultiInp.value || '';
-    const autoStr = autoMultiInp.value || '';
-
-    // helper parse list "9x,10x"
-    function parseList(s){
-      return s.split(',').map(x=>x.trim()).filter(x=>x.length);
-    }
-
-    const manualList = parseList(manualStr);
-    const autoList = parseList(autoStr);
-
-    // build pattern object
-    const p = {
-      name: configNameInp.value || 'Konfigurasi',
-      betMin, betMax,
-      turbo,
-      manual: [],
-      otomatis: []
-    };
-
-    // If preset bias provided, try vary around it
-    if(biasPreset && presets[biasPreset]){
-      const preset = presets[biasPreset];
-      // pick 1-2 manual multipliers around preset (random +/-)
-      const pm = preset.manual.split(',').map(s=>parseInt(s)||9);
-      for(let i=0;i<pm.length;i++){
-        const base = pm[i];
-        const modified = Math.max(1, base + randInt(-4, 6));
-        p.manual.push(modified + 'x');
-      }
-      const pa = preset.auto.split(',').map(s=>parseInt(s)||10);
-      for(let i=0;i<pa.length;i++){
-        const base = pa[i];
-        const modified = Math.max(1, base + randInt(-10, 20));
-        p.otomatis.push(modified + 'x');
-      }
-    } else {
-      // if manualList provided, randomize order/values a bit
-      if(manualList.length){
-        for(const m of manualList){
-          const n = parseInt(m) || randInt(3,20);
-          p.manual.push((Math.max(1, n + randInt(-2,4))) + 'x');
-        }
-      } else {
-        // generic random manual
-        const count = randInt(1,3);
-        for(let i=0;i<count;i++) p.manual.push(randInt(3,20) + 'x');
-      }
-
-      if(autoList.length){
-        for(const m of autoList){
-          const n = parseInt(m) || randInt(5,40);
-          p.otomatis.push((Math.max(1, n + randInt(-5,10))) + 'x');
-        }
-      } else {
-        const count = randInt(1,3);
-        for(let i=0;i<count;i++) p.otomatis.push(randInt(5,60) + 'x');
-      }
-    }
-
-    // additional meta
-    p.generatedAt = new Date().toISOString();
-    // random tip chance/perhaps we keep track of "GACOR" style label when some multipliers high
-    p.isGacor = p.otomatis.some(x => parseInt(x) >= 30) || p.manual.some(x => parseInt(x) >= 20);
-
-    pattern = p;
-    renderPattern();
-    addLog('Pola diacak: ' + JSON.stringify({
-      name:p.name, bet: p.betMin + '-' + p.betMax, manual:p.manual.join(','), otomatis:p.otomatis.join(','),
-      turbo:p.turbo, gacor:p.isGacor
-    }));
-    statusBox.innerText = 'Status: Pola diacak';
-    return p;
-  }
-
-  function renderPattern(){
-    patternText.innerText = JSON.stringify(pattern, null, 2);
-  }
-
-  // Draw card(s) from deck
-  function drawCards(count=1){
-    if(currentDeck.length === 0) currentDeck = createDeck();
-    // take from top
-    const draws = currentDeck.splice(0, count);
-    addLog('Draw: ' + draws.map(d=>d.code).join(', '));
-    lastDraw.innerText = draws.map(d=>d.code).join(', ');
-    renderDeck();
-    return draws;
-  }
-
-  // Buttons
-  acakDeckBtn.addEventListener('click', ()=>{
-    currentDeck = shuffle(createDeck());
-    renderDeck();
-    addLog('Deck diacak');
-    statusBox.innerText = 'Status: Deck diacak';
-  });
-
-  acakPolaBtn.addEventListener('click', ()=>{
-    // try to respect selected preset if any selected element has focus
-    // but we'll simply check config name contains preset or use random preset
-    let chosenPreset = null;
-    // if configName contains known preset name, bias to it
-    const name = configNameInp.value.toLowerCase();
-    for(const key of Object.keys(presets)){
-      if(name.includes(key) || name.includes(presets[key].name.toLowerCase())) {
-        chosenPreset = key; break;
-      }
-    }
-    // 50% chance to pick a random preset
-    if(!chosenPreset && Math.random() < 0.5){
-      const keys = Object.keys(presets);
-      chosenPreset = keys[randInt(0, keys.length-1)];
-    }
-
-    generatePatternRandomly(chosenPreset);
-  });
-
-  startAutoBtn.addEventListener('click', ()=>{
-    if(autoTimer) {
-      addLog('Mode otomatis sudah berjalan');
-      return;
-    }
-    const intervalSec = Math.max(1, parseInt(autoIntervalInp.value) || 5);
-    addLog('Mode otomatis mulai. Interval ' + intervalSec + 's');
-    statusBox.innerText = 'Status: Mode otomatis berjalan';
-    autoTimer = setInterval(()=>{
-      // tiap interval acak pola dan lakukan draw
-      generatePatternRandomly();
-      // draw a few cards depending on multipliers (simple heuristic)
-      const multiAvg = (() => {
-        const ms = pattern.manual.map(x=>parseInt(x)||0);
-        const as = pattern.otomatis.map(x=>parseInt(x)||0);
-        const arr = ms.concat(as).filter(n=>n>0);
-        if(!arr.length) return 1;
-        return Math.max(1, Math.round(arr.reduce((a,b)=>a+b,0)/arr.length/10)); // scale down
-      })();
-      const drawCount = Math.min(5, Math.max(1, multiAvg));
-      drawCards(drawCount);
-    }, intervalSec * 1000);
-  });
-
-  stopAutoBtn.addEventListener('click', ()=>{
-    if(autoTimer){ clearInterval(autoTimer); autoTimer=null; addLog('Mode otomatis dihentikan'); statusBox.innerText='Status: Otomatis berhenti'; }
-    else { addLog('Mode otomatis tidak aktif'); }
-  });
-
-  exportBtn.addEventListener('click', ()=>{
-    const data = {
-      pattern, deckRemaining: currentDeck.length, exportedAt: new Date().toISOString()
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = (pattern.name || 'config') + '.json';
-    a.click(); URL.revokeObjectURL(url);
-    addLog('Konfigurasi diekspor');
-  });
-
-  // Preset buttons
-  presetBtns.forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const key = btn.getAttribute('data-preset');
-      const p = presets[key];
-      if(!p) return;
-      configNameInp.value = p.name;
-      manualMultiInp.value = p.manual;
-      autoMultiInp.value = p.auto;
-      betMinInp.value = p.betMin;
-      betMaxInp.value = p.betMax;
-      turboModeSel.value = p.turbo || 'off';
-      addLog('Preset dipilih: ' + p.name);
-      statusBox.innerText = 'Status: Preset dipilih ' + p.name;
-    });
-  });
-
-  // Initial render
-  currentDeck = shuffle(createDeck());
-  renderDeck();
-  pattern = {
-    name:'Default',
-    betMin: 400,
-    betMax: 10000,
-    turbo: 'off',
-    manual: ['9x','9x'],
-    otomatis: ['10x','30x'],
-    generatedAt: new Date().toISOString()
-  };
-  renderPattern();
-  addLog('Aplikasi siap');
-
-  // Make sure user can click card to draw single
-  deckEl.addEventListener('click', (e)=>{
-    // draw 1 card on click
-    drawCards(1);
-  });
-
-  // Clean-up on unload
-  window.addEventListener('beforeunload', ()=>{
-    if(autoTimer) clearInterval(autoTimer);
-  });
-
-})();
-</script>
+  </div>
 
 </body>
 </html>
